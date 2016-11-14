@@ -1,0 +1,84 @@
+CREATE DATABASE shop
+
+CREATE TABLE users
+(
+    id_user INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nick VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    permission TINYINT(1) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    street VARCHAR(50) NOT NULL,
+    tel VARCHAR(50) NOT NULL
+    );
+
+CREATE TABLE news (
+    id_news INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    post_date DATE NOT NULL
+    );
+
+CREATE TABLE photos (
+    id_photo INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    path VARCHAR(200) NOT NULL
+    );
+
+CREATE TABLE categories (
+	id_category INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description VARCHAR(200) NOT NULL
+	);
+
+
+CREATE TABLE products (id_product INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50) NOT NULL, description TEXT NOT NULL,
+                       price DECIMAL(8,2) NOT NULL, category_id INT(11) NOT NULL, photo_id INT(11) NOT NULL)
+
+
+CREATE TABLE orders (id_order INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id INT(11) NOT NULL, product_id INT(11) NOT NULL, 
+                     total DECIMAL(10,2) NOT NULL, additional_info VARCHAR(255), order_date DATE)
+
+
+
+INSERT INTO users VALUES (NULL, 'wojot', 'wojtek', 1, 'Wojciech', 'Ciuba', 'Podolsze', 'Jutrzenki 5', '666700779')
+
+INSERT INTO categories VALUES (NULL, 'meskie', 'Kategoria ta, zawiera zegarki meskie'), (NULL, 'damskie', 'Kategoria ta, zawiera zegarki damskie')
+
+INSERT INTO photos VALUES (NULL, 'img/1.jpg')
+
+INSERT INTO products VALUES (NULL, 'Zegarek Geneva', 'Opis zegarka geneva koloru zlotego', 19.99, 1, 1)
+
+
+
+zapytac czy sie tak da:
+INSERT INTO orders VALUES (NULL, 1, 1, SUM(SELECT products.price FROM products, orders WHERE products.id_products=orders.product_id), 'jakies tam informacje dodatkowe', '2016-03-28')
+
+
+
+
+ALTER TABLE `products` ADD  CONSTRAINT `category_id` FOREIGN KEY (`category_id`) REFERENCES `shop`.`categories`(`id_category`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER TABLE `products` ADD  CONSTRAINT `photo_id` FOREIGN KEY (`photo_id`) REFERENCES `shop`.`photos`(`id_photo`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER TABLE `orders` ADD CONSTRAINT `user_id` FOREIGN KEY (`user_id`) REFERENCES `shop`.`users`(`id_user`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER TABLE `orders` ADD CONSTRAINT `product_id` FOREIGN KEY (`product_id`) REFERENCES `shop`.`products`(`id_product`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER DATABASE shop DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE categories DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE news DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE orders DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE photos DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE products DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE users DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+
+//TWORZENIE WIDOKU:
+
+CREATE OR REPLACE
+ VIEW `produkty`
+ AS SELECT products.id_product, products.name, products.description, products.price, categories.name AS 'category', photos.path
+FROM products, categories, photos
+WHERE products.category_id=categories.id_category AND products.photo_id=photos.id_photo
+ORDER BY products.id_product
